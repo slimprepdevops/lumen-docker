@@ -1,0 +1,51 @@
+version: '3.5'
+
+services:
+
+  mysql-db:
+    image: mysql:8.0
+    restart: always
+    container_name: mysql-db
+
+    volumes:
+      - my-db:/var/lib/mysql
+    
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_HOST=127.0.0.1
+
+    ports:
+      - '7010:3306'
+    expose:
+      - '7010'
+
+    networks:
+      backend:
+        aliases:
+          - db
+
+  node-statistics-app:
+    build:
+      context: '.'
+      args:
+        uid: ${UID}
+    container_name: node-statistics
+    restart: always
+    environment:
+      - APACHE_RUN_USER=#${UID}
+      - APACHE_RUN_GROUP=#${UID}
+    volumes:
+      - .:/var/www/html
+    ports:
+     - 8085:80
+    networks:
+      backend:
+        aliases:
+          - node-statistics
+
+networks:
+  backend:
+    name: backend-network
+volumes:
+  my-db: {}
