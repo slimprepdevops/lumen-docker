@@ -45,6 +45,8 @@ RUN useradd -u 1000 -ms /bin/bash -g www www
 # Copy code to /var/www
 COPY --chown=www:www-data . /var/www
 
+RUN chown -R www:www /var/www
+
 # add root to www group
 RUN chmod -R ugo+rw /var/www/storage
 
@@ -56,8 +58,17 @@ RUN cp docker/nginx.conf /etc/nginx/sites-enabled/default
 # Laravel Error Log Permission
 RUN chmod 777 /var/www/storage
 
+COPY .env.example /var/www/.env
+
 # Deployment steps
 RUN composer install --optimize-autoloader --dev
+
+RUN php artisan key:generate
+
+RUN php artisan jwt:secret
+
+RUN chmod 777 /var/www/docker
+
 RUN chmod +x /var/www/docker/run.sh
 
 EXPOSE 80
