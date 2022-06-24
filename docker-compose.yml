@@ -6,7 +6,7 @@ services:
     # image: mysql:8.0
     build:
       context: ./sql
-    restart: always
+    restart: always  
     container_name: mysql-db
     volumes:
       - my-db:/var/lib/mysql
@@ -29,8 +29,17 @@ services:
     labels:
       - traefik.enable=true
       # HTTP router with redirect
-      - traefik.http.routers.lumen.entrypoints=web
-      - traefik.http.routers.lumen.rule=Host(`lumen.sketapp.com`)
+      - traefik.http.routers.lumen-http.entrypoints=web
+      - traefik.http.routers.lumen-http.rule=Host(`lumen.sketapp.com`)
+      - traefik.http.routers.lumen-http.middlewares=lumen-redirect-to-https
+      # HTTPS
+      - traefik.http.routers.lumen-https.entrypoints=web-secured
+      - traefik.http.routers.lumen-https.rule=Host(`lumen.sketapp.com`)
+      - traefik.http.routers.lumen-https.tls=true
+      - traefik.http.routers.lumen-https.tls.certresolver=mytlschallenge
+      - traefik.http.middlewares.lumen-redirect-to-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.lumen-redirect-to-https.redirectscheme.permanent=true
+      
     volumes:
       - .:/var/www/html
     ports:
